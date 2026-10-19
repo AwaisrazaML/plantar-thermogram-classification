@@ -34,16 +34,31 @@ def discover_images(data_dir: str | Path) -> tuple[list[Path], list[int], list[s
     return paths, labels, class_names
 
 
-def subject_ids(paths: list[Path], labels: list[int], pattern: str | None) -> list[str]:
-    """Subject ID per image. Without a pattern, every image is its own subject."""
-    if pattern is None:
-        return [str(p) for p in paths]
-    regex = re.compile(pattern)
+def subject_ids(
+    paths: list[Path], labels: list[int], pattern: str | None, data_dir: str | Path | None = None
+) -> list[str]:
+    """Subject ID per image, so one person's images never cross splits.
+
+    Priority: regex on the file name, then the per-subject sub-folder
+    (data/<class>/<subject>/image.png), otherwise each image on its own.
+    """
+    regex = re.compile(pattern) if pattern else None
     ids = []
     for path, label in zip(paths, labels):
-        match = regex.search(path.stem)
+        subject = path.stem
+        if regex:
+            match = regex.search(path.stem)
+            subject = match.group(1) if match else path.stem
+        elif data_dir is not None:
+            relative = path.relative_to(data_dir).parts  # (class, [subject,] file)
+            if len(relative) >= 3:
+                subject = relative[1]
+            else:
+                subject = str(path)
+        else:
+            subject = str(path)
         # prefix with label so IDs are unique across classes
-        ids.append(f"{label}:{match.group(1) if match else path.stem}")
+        ids.append(f"{label}:{subject}")
     return ids
 
 

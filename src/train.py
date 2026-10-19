@@ -108,7 +108,8 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     paths, labels, class_names = discover_images(args.data_dir)
-    subjects = subject_ids(paths, labels, args.subject_regex)
+    subjects = subject_ids(paths, labels, args.subject_regex, args.data_dir)
+    print(f"{len(paths)} images from {len(set(subjects))} subjects, classes: {class_names}")
     splits = split_by_subject(paths, labels, subjects, seed=args.seed)
     for name, (_, split_labels) in splits.items():
         counts = {class_names[k]: v for k, v in sorted(Counter(split_labels).items())}
