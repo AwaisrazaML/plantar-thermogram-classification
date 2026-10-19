@@ -1,0 +1,17 @@
+# data and outputs (dataset is not redistributed)
+data/*
+!data/.gitkeep
+outputs/*
+!outputs/.gitkeep
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# os / editors
+.DS_Store
+.vscode/
+.idea/
